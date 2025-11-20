@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AMEE 醫學人文沙龍 — 遠行之後 回望的悸動</title>
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website" />
+<meta property="og:title" content="AMEE 醫學人文沙龍｜遠行之後 回望的悸動" />
+<meta property="og:description" content="歡迎來到 醫學人文AMEE沙龍！讓我們一起在教學路上同行。" />
+<meta property="og:image" content="" />
+
+<style>
+:root { 
+    /* 依據 amee.jpg 與新海報提取的配色 (墨綠、質感金、米白) */
+    --bg1: #1a2f23; /* 深墨綠 */
+    --bg2: #2f4f4f; /* 深灰綠 */
+    --primary: #eaddbd; /* 溫潤米金 (文字主色) */
+    --highlight: #d4b982; /* 亮金 (強調色) */
+    --accent: #8fbc8f; /* 鼠尾草綠 (次要強調) */
+    --text: #f0fdf4; /* 極淺綠白 */
+    
+    --card-bg: rgba(26, 47, 35, 0.9); /* 深綠背景，稍微不透明一點以凸顯文字 */
+    --card-border: rgba(143, 188, 143, 0.3); /* 淺綠邊框 */
+    
+    --input-bg: rgba(255, 255, 255, 0.08);
+    --input-border: rgba(143, 188, 143, 0.4);
+    
+    --pill-active-bg: #d4b982;
+    --pill-active-border: #b89b65;
+    --pill-active-text: #1a2f23;
+    
+    --submit-bg: linear-gradient(135deg, #4a7c59, #2e5c43);
+    --submit-text: #ffffff;
+}
+
+body { 
+    margin:0; 
+    font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; 
+    color:var(--text); 
+    background:
+        radial-gradient(circle at top left, rgba(212, 185, 130, 0.15), transparent 40%),
+        radial-gradient(circle at bottom right, rgba(74, 124, 89, 0.2), transparent 40%),
+        linear-gradient(180deg, #0f1912 0%, #1c3326 50%, #14261b 100%);
+    background-size: cover;
+    background-attachment: fixed;
+    min-height:100vh; 
+    line-height: 1.7; 
+}
+
+.container { max-width:900px; margin:0 auto; padding:24px; }
+.hero-grid { display:flex; flex-direction:column; gap:24px; margin-top:16px; }
+
+/* 海報圖片樣式 */
+.poster-container {
+  width: 100%;
+  max-width: 500px; 
+  margin: 0 auto;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--card-border);
+}
+.poster-image {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.hero-card { border-radius:20px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,0.4); position:relative; }
+
+.hero-card.hero-info { 
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    padding:32px 28px; 
+    color:#f0fdf4; 
+    border:1px solid var(--card-border);
+    text-align: center; 
+}
+/* 光暈動畫 */
+.hero-card.hero-info::before { 
+    content:""; 
+    position:absolute; 
+    inset:-20%; 
+    background:radial-gradient(circle at 50% 50%, rgba(212, 185, 130, 0.08), transparent 60%); 
+    animation:pulseGlow 8s ease-in-out infinite; 
+    z-index:0; 
+}
+.hero-card.hero-info > * { position:relative; z-index:2; }
+
+h1 { 
+    font-size:32px; 
+    margin:0 0 16px 0; 
+    letter-spacing:1px; 
+    font-weight: 800;
+    color: var(--highlight); 
+    text-shadow: 0 2px 15px rgba(0,0,0,0.6);
+    line-height: 1.4;
+}
+
+.sub-headline {
+    font-size: 18px;
+    font-weight: 600;
+    color: #eaddbd;
+    margin-bottom: 24px;
+    display: inline-block;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(212, 185, 130, 0.3);
+}
+
+.instruction-text {
+    background: rgba(255,255,255,0.05);
+    padding: 16px;
+    border-radius: 12px;
+    font-size: 15px;
+    color: #fff;
+    border: 1px dashed var(--accent);
+    margin-top: 20px;
+}
+
+.card { 
+    background: var(--card-bg);
+    border-radius:16px; 
+    padding:24px; 
+    margin:20px 0; 
+    box-shadow:0 10px 30px rgba(0,0,0,.4); 
+    border:1px solid var(--card-border); 
+    backdrop-filter:blur(10px); 
+    color:#f0fdf4; 
+}
+.section-title { 
+    font-weight:700; 
+    font-size:20px; 
+    margin:0 0 16px 0; 
+    color: var(--highlight); 
+    border-bottom: 1px solid rgba(212, 185, 130, 0.3); 
+    padding-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:16px 20px; }
+
+label { display:block; font-weight:600; margin-bottom:8px; color: #d1e7dd; }
+
+select, input[type="text"], textarea, input[type="number"] { 
+    width:100%; 
+    border:1px solid var(--input-border); 
+    border-radius:10px; 
+    padding:12px; 
+    font-size:15px; 
+    outline:none; 
+    background: var(--input-bg);
+    color: #fff;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+}
+select:focus, input:focus, textarea:focus {
+    border-color: var(--highlight);
+    background: rgba(255,255,255,0.12);
+}
+select option { background: #1a2f23; color: #fff; }
+
+/* Likert Scale Styles */
+.likert { display:flex; gap:6px; flex-wrap:wrap; }
+.pill { 
+    padding:10px 6px; 
+    border:1px solid var(--input-border); 
+    border-radius:8px; 
+    cursor:pointer; 
+    user-select:none; 
+    transition:all .2s;
+    font-size: 14px;
+    text-align: center;
+    background: rgba(0,0,0,0.2);
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 30px;
+}
+.pill input { display:none; }
+.pill:hover { background: rgba(212, 185, 130, 0.2); }
+.pill.active { 
+    background: var(--pill-active-bg); 
+    border-color: var(--pill-active-border); 
+    color: var(--pill-active-text);
+    font-weight: 700;
+    box-shadow: 0 0 15px rgba(212, 185, 130, 0.4);
+    transform: scale(1.05);
+}
+
+/* Checkbox & Radio Custom Styles */
+.checkbox-group { display: flex; flex-direction: column; gap: 10px; }
+.radio-group-row { display: flex; flex-wrap: wrap; gap: 12px; }
+
+.checkbox-label {
+    display: flex; align-items: center; gap: 12px; cursor: pointer;
+    padding: 10px 16px; border-radius: 8px; border: 1px solid var(--input-border);
+    background: var(--input-bg); transition: all 0.2s;
+    flex: 1; min-width: 120px;
+}
+.checkbox-label:hover { background: rgba(255,255,255,0.1); }
+.checkbox-label input { margin: 0; accent-color: var(--highlight); }
+
+/* Radio specific styling override to match theme */
+.checkbox-label input[type="radio"] {
+    appearance: none; width: 18px; height: 18px; border: 2px solid var(--accent); border-radius: 50%;
+    display: grid; place-content: center;
+}
+.checkbox-label input[type="radio"]::before {
+    content: ""; width: 10px; height: 10px; border-radius: 50%; transform: scale(0); transition: 120ms transform ease-in-out;
+    background: var(--highlight);
+}
+.checkbox-label input[type="radio"]:checked::before { transform: scale(1); }
+.checkbox-label input[type="radio"]:checked { border-color: var(--highlight); }
+.checkbox-label input[type="checkbox"] { accent-color: var(--highlight); }
+
+.submit { 
+    display:block; 
+    width: 100%;
+    background: var(--submit-bg); 
+    color: var(--submit-text); 
+    border:0; 
+    padding:16px; 
+    border-radius:12px; 
+    font-weight:700; 
+    font-size: 18px;
+    cursor:pointer; 
+    margin-top:24px; 
+    box-shadow:0 10px 20px rgba(0,0,0,0.3); 
+    transition: all .3s;
+}
+.submit:hover { transform: translateY(-2px); filter: brightness(1.1); }
+.submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+.note { font-size:14px; color:#aabeb4; margin-top: -8px; margin-bottom: 16px; font-style: italic; }
+
+/* Toggle Tabs */
+.toggle { 
+    display:flex; justify-content: center; gap: 8px; 
+    background:rgba(0,0,0,.4); padding:8px; border-radius:16px; 
+    border: 1px solid var(--card-border); margin: 24px auto; 
+    max-width: 600px; 
+}
+.toggle button { 
+    flex: 1;
+    border:0; 
+    padding:12px; 
+    border-radius:10px; 
+    background:transparent; 
+    font-weight:600; 
+    cursor:pointer; 
+    color:#aabeb4; 
+    transition: all .2s;
+    font-size: 16px;
+}
+.toggle button:hover { color: #fff; background: rgba(255,255,255,0.05); }
+.toggle button.active { 
+    background: var(--highlight); 
+    color: #1a2f23; 
+    box-shadow:0 4px 15px rgba(0,0,0,0.3); 
+}
+
+/* Sub-group Cards */
+.sub-group-grid { display:grid; gap: 24px; margin-top: 16px; margin-bottom: 24px; }
+.sub-group-card {
+    background: rgba(0,0,0, 0.2);
+    border-radius:12px; 
+    padding:20px; 
+    border:1px solid rgba(255,255,255, 0.05);
+}
+.sub-group-card h3 {
+    font-size: 17px;
+    font-weight: 700;
+    margin: 0 0 16px 0;
+    color: var(--accent); 
+    border-bottom: 1px dashed rgba(143, 188, 143, 0.3);
+    padding-bottom: 8px;
+}
+.likert-item { margin-bottom: 24px; }
+.likert-item:last-child { margin-bottom: 0; }
+.likert-item label { margin-bottom: 10px; line-height: 1.5; color: #f0fdf4; font-weight: 500; font-size: 16px; }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(5px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; visibility: hidden; transition: all .3s; z-index: 100;
+}
+.modal-overlay.visible { opacity: 1; visibility: visible; }
+.modal-content {
+  background: #1c3326;
+  border: 1px solid var(--highlight);
+  border-radius: 16px;
+  padding: 32px;
+  width: 90%; max-width: 400px;
+  box-shadow: 0 0 40px rgba(0,0,0,0.7);
+  transform: scale(0.9); transition: all .3s;
+  text-align: center;
+  color: #fff;
+}
+.modal-overlay.visible .modal-content { transform: scale(1); }
+.modal-content h2 { margin: 0 0 12px 0; color: var(--highlight); font-size: 24px; }
+.modal-content button {
+  background: var(--highlight); color: #1a2f23; border: 0; padding: 10px 24px;
+  border-radius: 99px; font-weight: 700; cursor: pointer; margin-top: 24px;
+  font-size: 16px;
+}
+
+footer { text-align:center; padding:40px 0 20px; font-size:14px; color:rgba(255,255,255,0.4); }
+
+@keyframes pulseGlow {
+  0% { opacity:0.3; transform: scale(1); }
+  50% { opacity:0.6; transform: scale(1.02); }
+  100% { opacity:0.3; transform: scale(1); }
+}
+
+/* RWD */
+@media (max-width:600px) {
+  .container { padding:16px; }
+  h1 { font-size:26px; }
+  .toggle { flex-direction: column; gap: 4px; }
+  .likert .pill { padding: 12px 4px; font-size: 13px; }
+  .radio-group-row { flex-direction: column; gap: 8px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal-content">
+    <h2 id="modal-title">提示</h2>
+    <p id="modal-message">訊息內容</p>
+    <button id="modal-close">確定</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="hero-grid">
+    <!-- 海報圖片 -->
+    <div class="poster-container">
+      <img src="amee.jpg" alt="AMEE 海報" class="poster-image">
+    </div>
+    
+    <div class="hero-card hero-info">
+      <h1>遠行之後 回望的悸動</h1>
+      <div class="sub-headline">醫學人文沙龍 × AMEE現地趨勢 × 微型深度交流</div>
+      
+      <div class="instruction-text">
+        歡迎來到 醫學人文AMEE沙龍！請依據課程進度，填寫下方的前測、後測及滿意度問卷，讓我們一起在教學路上同行。
+      </div>
+    </div>
+  </div>
+
+  <!-- 隱私聲明 -->
+  <div class="card">
+    <div class="section-title">隱私權聲明</div>
+    <p class="note">本問卷採匿名方式進行，資料僅供教學品質改善與學術研究分析使用。</p>
+    <label class="checkbox-label" style="background: rgba(212, 185, 130, 0.1); border-color: var(--highlight);">
+      <input type="checkbox" id="consent">
+      <span>我已閱讀並同意參與調查</span>
+    </label>
+  </div>
+
+  <!-- 基本資料 (共用) -->
+  <div class="card">
+    <div class="section-title">基本資料 (Basic Info)</div>
+    <div class="grid" style="grid-template-columns: 1fr;">
+      <!-- 1. 身份 -->
+      <div>
+        <label>1. 您目前的身份</label>
+        <div class="radio-group-row" id="role-group">
+            <label class="checkbox-label"><input type="radio" name="role" value="醫師"> 醫師</label>
+            <label class="checkbox-label"><input type="radio" name="role" value="護理師"> 護理師</label>
+            <label class="checkbox-label"><input type="radio" name="role" value="實習醫療人員"> 實習醫療人員</label>
+            <label class="checkbox-label"><input type="radio" name="role" value="醫療相關專業人員"> 醫療相關專業人員</label>
+            <label class="checkbox-label"><input type="radio" name="role" value="非醫療人員"> 非醫療人員</label>
+        </div>
+      </div>
+
+      <!-- 2. 年資 -->
+      <div style="margin-top: 16px;">
+        <label>2. 您在臨床或教學領域的年資</label>
+        <div class="radio-group-row">
+            <label class="checkbox-label"><input type="radio" name="years" value="0–1年"> 0–1 年</label>
+            <label class="checkbox-label"><input type="radio" name="years" value="1–3年"> 1–3 年</label>
+            <label class="checkbox-label"><input type="radio" name="years" value="3–5年"> 3–5 年</label>
+            <label class="checkbox-label"><input type="radio" name="years" value="5–10年"> 5–10 年</label>
+            <label class="checkbox-label"><input type="radio" name="years" value="10年以上"> 10+ 年</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 切換按鈕 -->
+  <div class="toggle">
+    <button id="btn-pre" class="active">前測 (Pre-test)</button>
+    <button id="btn-post">後測 (Post-test)</button>
+    <button id="btn-sat">滿意度 (Satisfaction)</button>
+  </div>
+
+  <!-- A. 前測問卷 -->
+  <div class="card" id="pre-test-card">
+    <div class="section-title">前測問卷 (Pre-test)</div>
+    <p class="note">請依照您目前的真實想法填寫 (1=非常不同意, 5=非常同意)</p>
+    
+    <div id="pre-likert-container"></div>
+    
+    <div class="sub-group-card" style="margin-top: 24px;">
+        <h3>開放式問題</h3>
+        <label>11. 此活動我希望獲得的內容：</label>
+        <textarea id="pre-open-1" rows="3"></textarea>
+    </div>
+    
+    <button class="submit" id="submit-btn-pre" onclick="submitSurvey('pre')">提交前測問卷</button>
+  </div>
+
+  <!-- B. 後測問卷 -->
+  <div class="card" id="post-test-card" style="display:none;">
+    <div class="section-title">後測問卷 (Post-test)</div>
+    <p class="note">活動結束後填寫 (1=非常不同意, 5=非常同意)</p>
+    
+    <div id="post-likert-container"></div>
+    
+    <div class="sub-group-card" style="margin-top: 24px;">
+        <h3>開放式回饋</h3>
+        <label>17. 本次活動最有感收穫：</label>
+        <textarea id="post-open-1" rows="3"></textarea>
+    </div>
+    
+    <button class="submit" id="submit-btn-post" onclick="submitSurvey('post')">提交後測問卷</button>
+  </div>
+
+  <!-- C. 滿意度問卷 -->
+  <div class="card" id="satisfaction-card" style="display:none;">
+    <div class="section-title">滿意度問卷 (Satisfaction)</div>
+    <p class="note">請給予我們回饋 (1=非常不滿意, 5=非常滿意)</p>
+    
+    <div id="sat-likert-container"></div>
+    
+    <div class="sub-group-card" style="margin-top: 24px;">
+        <h3>建議與改善</h3>
+        <label>7. 建議改善的部分：</label>
+        <textarea id="sat-open-1" rows="3"></textarea>
+    </div>
+    
+    <button class="submit" id="submit-btn-sat" onclick="submitSurvey('sat')">提交滿意度問卷</button>
+  </div>
+
+  <footer>© 2025 奇美醫院AMEE 醫學人文沙龍 Chi Mei Medical Center</footer>
+</div>
+
+<script>
+/* ---------------------------------- */
+/* UI 控制 */
+/* ---------------------------------- */
+const modalOverlay = document.getElementById('modal-overlay');
+const modalTitle = document.getElementById('modal-title');
+const modalMessage = document.getElementById('modal-message');
+const modalClose = document.getElementById('modal-close');
+
+function showModal(title, message) {
+  modalTitle.textContent = title;
+  modalMessage.textContent = message;
+  modalOverlay.classList.add('visible');
+}
+function hideModal() { modalOverlay.classList.remove('visible'); }
+modalClose.onclick = hideModal;
+modalOverlay.onclick = (e) => { if (e.target === modalOverlay) hideModal(); };
+
+const btnPre = document.getElementById("btn-pre");
+const btnPost = document.getElementById("btn-post");
+const btnSat = document.getElementById("btn-sat");
+const cards = {
+    pre: document.getElementById("pre-test-card"),
+    post: document.getElementById("post-test-card"),
+    sat: document.getElementById("satisfaction-card")
+};
+
+function switchTab(tabName) {
+    Object.values(cards).forEach(c => c.style.display = "none");
+    [btnPre, btnPost, btnSat].forEach(b => b.classList.remove("active"));
+
+    cards[tabName].style.display = "block";
+    if(tabName === 'pre') btnPre.classList.add("active");
+    if(tabName === 'post') btnPost.classList.add("active");
+    if(tabName === 'sat') btnSat.classList.add("active");
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+btnPre.onclick = () => switchTab('pre');
+btnPost.onclick = () => switchTab('post');
+btnSat.onclick = () => switchTab('sat');
+
+/* ---------------------------------- */
+/* 問卷題目資料 (依據 AMEE問卷.docx) */
+/* ---------------------------------- */
+
+const PRE_TEST_GROUPS = [
+  {
+    title: "醫學人文與議程基線認知 (Kirkpatrick L2)",
+    startIndex: 1,
+    items: [
+      "我對醫學人文的意義已有基本理解",
+      "我了解 PBL 的核心精神",
+      "我知道如何引導學生進行反思",
+      "我對 Kolb 循環有基礎概念",
+      "我了解 SDT 三構面"
+    ]
+  },
+  {
+    title: "SDT 基準",
+    startIndex: 6,
+    items: [
+      "我覺得自己具備勝任感",
+      "我在教學團隊中感到關係感"
+    ]
+  },
+  {
+    title: "Kolb 經驗學習基線",
+    startIndex: 8,
+    items: [
+      "我會反思自己的教學",
+      "我願意採用新教學法"
+    ]
+  },
+  {
+    title: "行為意向 (Kirkpatrick L3)",
+    startIndex: 10,
+    items: [
+      "我願意在人文活動後改變教學方式"
+    ]
+  }
+];
+
+const POST_TEST_GROUPS = [
+  {
+    title: "學習成果 (Kirkpatrick L2)",
+    startIndex: 1,
+    items: [
+      "活動提升了我對醫學人文的理解",
+      "活動提升了我對 PBL 帶領技巧的掌握",
+      "我能運用 Kolb 循環於教學",
+      "我理解 SDT 對動機的影響"
+    ]
+  },
+  {
+    title: "SDT 提升",
+    startIndex: 5,
+    items: [
+      "這次的活動增加我在教學上的勝任感",
+      "這次的活動將會促進我與同儕的關係感"
+    ]
+  },
+  {
+    title: "Kolb 應用能力",
+    startIndex: 7,
+    items: [
+      "我在活動中進行反思",
+      "透過這次活動，我將有更多計畫應用策略於教學"
+    ]
+  },
+  {
+    title: "行為 (Kirkpatrick L3)",
+    startIndex: 9,
+    items: [
+      "這次活動後，我會加入更多反思教學元素",
+      "這次活動後，我會採用以學生為中心策略來從事教學相關活動"
+    ]
+  },
+  {
+    title: "結果層級 (Kirkpatrick L4)",
+    startIndex: 11,
+    items: [
+      "我認為此活動將改善教學文化"
+    ]
+  }
+];
+
+const SATISFACTION_GROUPS = [
+  {
+    title: "整體滿意度",
+    startIndex: 1,
+    items: [
+      "活動整體滿意度",
+      "講者呈現方式",
+      "時間安排是否合適",
+      "是否有足夠反思空間",
+      "是否符合期待"
+    ]
+  },
+  {
+    title: "推薦意願",
+    startIndex: 6,
+    items: [
+      "是否願意推薦同事參與 (1-10分)"
+    ],
+    scale: 10 // 特別標記：這題是 10 分量表
+  }
+];
+
+/* ---------------------------------- */
+/* 渲染函式 */
+/* ---------------------------------- */
+function renderGroupedLikert(containerId, groups, prefix) {
+  const container = document.getElementById(containerId);
+  const groupGrid = document.createElement('div');
+  groupGrid.className = "sub-group-grid";
+  container.appendChild(groupGrid);
+
+  groups.forEach(group => {
+    const groupCard = document.createElement('div');
+    groupCard.className = "sub-group-card";
+    
+    const title = document.createElement('h3');
+    title.textContent = group.title;
+    groupCard.appendChild(title);
+
+    group.items.forEach((text, idx) => {
+      const questionNumber = group.startIndex + idx;
+      
+      const row = document.createElement('div');
+      row.className = "likert-item";
+      
+      const label = document.createElement('label');
+      label.textContent = `${questionNumber}. ${text}`; 
+      row.appendChild(label);
+
+      const likertScale = document.createElement('div');
+      likertScale.className = "likert";
+      
+      const radioName = `${prefix}_${questionNumber}`;
+      
+      // 判斷是否為 10 分量表
+      const maxScale = group.scale || 5;
+      const scaleValues = Array.from({length: maxScale}, (_, i) => (i + 1).toString());
+      
+      scaleValues.forEach(value => {
+        const pill = document.createElement('label');
+        pill.className = "pill";
+        // 如果是 10 分量表，調整寬度讓它排得下
+        if (maxScale === 10) {
+            pill.style.padding = "10px 2px";
+            pill.style.minWidth = "24px";
+            pill.style.fontSize = "13px";
+        }
+        
+        const input = document.createElement('input');
+        input.type = "radio";
+        input.name = radioName;
+        input.value = value;
+
+        pill.appendChild(input);
+        pill.appendChild(document.createTextNode(value));
+
+        pill.addEventListener("click", () => {
+          const siblings = row.querySelectorAll('.pill');
+          siblings.forEach(s => s.classList.remove('active'));
+          pill.classList.add('active');
+          input.checked = true;
+        });
+
+        likertScale.appendChild(pill);
+      });
+
+      row.appendChild(likertScale);
+      groupCard.appendChild(row);
+    });
+    
+    groupGrid.appendChild(groupCard);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    renderGroupedLikert("pre-likert-container", PRE_TEST_GROUPS, "pre");
+    renderGroupedLikert("post-likert-container", POST_TEST_GROUPS, "post");
+    renderGroupedLikert("sat-likert-container", SATISFACTION_GROUPS, "sat");
+});
+
+
+/* ---------------------------------- */
+/* 提交邏輯 */
+/* ---------------------------------- */
+// 使用您最後提供的部署網址
+const DEPLOYED_URL = "https://script.google.com/macros/s/AKfycbyC9EKR6T5sWUQkXtzLk9EVFyabHB_fK6ZBcqGWPRp9q6lzXZWxKSOr297SHUtsKeOO1w/exec";
+
+function getRadioValue(name) {
+    const el = document.querySelector(`input[name="${name}"]:checked`);
+    return el ? el.value : "";
+}
+
+function validateLikert(groups, prefix) {
+    const missing = [];
+    groups.forEach(group => {
+        group.items.forEach((_, idx) => {
+            const qNum = group.startIndex + idx;
+            if (!getRadioValue(`${prefix}_${qNum}`)) {
+                missing.push(qNum);
+            }
+        });
+    });
+    return missing;
+}
+
+async function submitSurvey(type) {
+    // 1. 隱私同意檢查
+    if (!document.getElementById("consent").checked) {
+        showModal("提醒", "請先勾選「我已閱讀並同意參與調查」。");
+        return;
+    }
+    
+    // 2. 基本資料檢查
+    const role = getRadioValue("role"); // 改為單選
+    const years = getRadioValue("years");
+
+    if (!role || !years) {
+        showModal("提醒", "請先完成上方「基本資料」所有欄位。");
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+    }
+
+    // 3. 準備資料 Payload
+    let payload = {
+        timestamp: new Date().toISOString(),
+        role: role,
+        years: years // 改名為 years 以符合新需求
+    };
+
+    let groups = [];
+    let prefix = "";
+    let openIds = [];
+    
+    if (type === 'pre') {
+        payload.surveyName = "AMEE前測";
+        groups = PRE_TEST_GROUPS;
+        prefix = "pre";
+        openIds = ["pre-open-1"];
+    } else if (type === 'post') {
+        payload.surveyName = "AMEE後測";
+        groups = POST_TEST_GROUPS;
+        prefix = "post";
+        openIds = ["post-open-1"];
+    } else if (type === 'sat') {
+        payload.surveyName = "AMEE滿意度";
+        groups = SATISFACTION_GROUPS;
+        prefix = "sat";
+        openIds = ["sat-open-1"];
+    }
+
+    // 4. 驗證 Likert 必填
+    const missing = validateLikert(groups, prefix);
+    if (missing.length > 0) {
+        showModal("未完成", `第 ${missing.join(", ")} 題尚未填寫，請檢查。`);
+        return;
+    }
+
+    // 5. 收集 Likert 資料
+    groups.forEach(group => {
+        group.items.forEach((_, idx) => {
+            const qNum = group.startIndex + idx;
+            payload[`${prefix}_${qNum}`] = getRadioValue(`${prefix}_${qNum}`);
+        });
+    });
+
+    // 6. 收集開放式問題
+    openIds.forEach((id, idx) => {
+        const el = document.getElementById(id);
+        if(el) payload[`open_${prefix}_${idx+1}`] = el.value.replace(/\n/g, " ");
+    });
+
+    console.log("Ready to send:", payload);
+
+    // 7. 傳送
+    const btn = document.getElementById(`submit-btn-${type}`);
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "傳送中...";
+
+    try {
+        await fetch(DEPLOYED_URL, {
+            method: "POST",
+            mode: "no-cors",
+            body: JSON.stringify(payload),
+            headers: { "Content-Type": "application/json" }
+        });
+        
+        showModal("提交成功", "您的回饋已送出，感謝您的參與！");
+        btn.textContent = "已提交";
+        
+        // 自動引導到下一階段
+        if(type === 'pre') {
+            setTimeout(() => { switchTab('post'); }, 2000);
+        } else if(type === 'post') {
+            setTimeout(() => { switchTab('sat'); }, 2000);
+        }
+
+    } catch (e) {
+        console.error(e);
+        showModal("錯誤", "提交失敗，請檢查網路連線。");
+        btn.disabled = false;
+        btn.textContent = originalText;
+    }
+}
+</script>
+</body>
+</html>
