@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025 奇美月 | 醫學人文沙龍儀表板</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Serif+TC:wght@400;600;700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sage: {
+                            50: '#f4f7f4',
+                            100: '#e3ebe3',
+                            200: '#c5d6c5',
+                            300: '#9bb69b',
+                            400: '#749474',
+                            500: '#567656',
+                            600: '#425e42',
+                            700: '#364b36',
+                            800: '#2d3d2d',
+                            900: '#263226',
+                        },
+                        cream: '#FDFBF7',
+                    },
+                    fontFamily: {
+                        serif: ['"Playfair Display"', '"Noto Serif TC"', 'serif'],
+                        sans: ['"Lato"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #FDFBF7;
+            color: #2d3d2d;
+            background-image: radial-gradient(#9bb69b 0.5px, transparent 0.5px);
+            background-size: 20px 20px;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(86, 118, 86, 0.08);
+            border: 1px solid #e3ebe3;
+            transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #9bb69b, #567656);
+        }
+
+        /* Sticky Notes */
+        .sticky-note {
+            transition: transform 0.2s;
+            box-shadow: 2px 4px 8px rgba(0,0,0,0.1);
+            font-family: 'Noto Serif TC', serif;
+        }
+        .sticky-note:hover {
+            transform: scale(1.05) rotate(0deg) !important;
+            z-index: 10;
+            box-shadow: 4px 8px 16px rgba(0,0,0,0.15);
+        }
+        .note-color-1 { background-color: #fff7ed; border-left: 4px solid #fdba74; transform: rotate(-1deg); }
+        .note-color-2 { background-color: #f0fdf4; border-left: 4px solid #86efac; transform: rotate(1deg); }
+        .note-color-3 { background-color: #eff6ff; border-left: 4px solid #93c5fd; transform: rotate(-1.5deg); }
+        .note-color-4 { background-color: #fdf4ff; border-left: 4px solid #f0abfc; transform: rotate(1.5deg); }
+
+        /* Session List Styling */
+        .session-item {
+            border-bottom: 1px dashed #e3ebe3;
+            padding: 12px 0;
+        }
+        .session-item:last-child {
+            border-bottom: none;
+        }
+        .session-time {
+            color: #567656;
+            font-weight: 700;
+            font-family: 'Lato', sans-serif;
+            min-width: 50px;
+        }
+
+        /* Hide default checkbox but keep logic */
+        .hidden-control {
+            display: none;
+        }
+    </style>
+</head>
+<body class="p-6 md:p-10 min-h-screen flex flex-col items-center">
+
+    <!-- Header -->
+    <header class="w-full max-w-7xl mb-8 flex flex-col md:flex-row justify-between items-end border-b-2 border-sage-200 pb-6">
+        <div>
+            <h1 class="text-3xl md:text-4xl font-serif text-sage-800 font-bold flex items-center gap-3">
+                <i class="fa-solid fa-leaf text-sage-400"></i>
+                2025 奇美月｜醫學人文沙龍成效分析儀表板
+            </h1>
+            <p class="text-sage-600 mt-3 font-sans text-lg tracking-wide font-medium">
+                醫學人文沙龍 × AMEE現地趨勢 × 微型深度交流
+            </p>
+        </div>
+        
+        <!-- Hidden Control Logic (Auto-connects) -->
+        <input type="checkbox" id="use-real-data" class="hidden-control" checked>
+    </header>
+
+    <main class="w-full max-w-7xl grid grid-cols-1 md:grid-cols-12 gap-6">
+
+        <!-- KPI Cards (Row 1) -->
+        <div class="col-span-12 grid grid-cols-1 md:grid-cols-4 gap-6 mb-2">
+            <!-- Total Responses (Questionnaire) -->
+            <div class="card p-6 bg-white">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sage-400 text-sm font-bold uppercase">問卷回覆數</p>
+                        <h3 class="text-4xl font-serif text-sage-800 mt-2" id="total-responses">0</h3>
+                    </div>
+                    <div class="bg-sage-100 p-3 rounded-full text-sage-600">
+                        <i class="fa-solid fa-clipboard-list text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Attendance (Fixed) -->
+            <div class="card p-6 bg-white">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sage-400 text-sm font-bold uppercase">沙龍總出席人次</p>
+                        <h3 class="text-4xl font-serif text-sage-800 mt-2">140</h3>
+                    </div>
+                    <div class="bg-sage-100 p-3 rounded-full text-sage-600">
+                        <i class="fa-solid fa-users text-xl"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-sage-400 mt-2">9場次總計</p>
+            </div>
+
+            <!-- Overall Satisfaction -->
+            <div class="card p-6 bg-white">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sage-400 text-sm font-bold uppercase">整體滿意度</p>
+                        <h3 class="text-4xl font-serif text-sage-800 mt-2" id="avg-satisfaction">0.0</h3>
+                    </div>
+                    <div class="bg-sage-100 p-3 rounded-full text-sage-600">
+                        <i class="fa-solid fa-heart text-xl"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-sage-400 mt-2">滿分 5.0</p>
+            </div>
+
+            <!-- Recommendation (SAT 6) -->
+            <div class="card p-6 bg-white">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sage-400 text-sm font-bold uppercase">推薦意願</p>
+                        <h3 class="text-4xl font-serif text-sage-800 mt-2" id="avg-recommend">0.0</h3>
+                    </div>
+                    <div class="bg-sage-100 p-3 rounded-full text-sage-600">
+                        <i class="fa-solid fa-thumbs-up text-xl"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-sage-400 mt-2">滿分 10.0</p>
+            </div>
+        </div>
+
+        <!-- Session Info (New Section) -->
+        <div class="col-span-12 card p-6 bg-white mb-2">
+            <h3 class="text-xl font-serif text-sage-800 mb-4 border-b border-sage-100 pb-2">
+                <i class="fa-solid fa-calendar-day mr-2 text-sage-500"></i> 
+                場次主題與出席概況
+            </h3>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                <!-- Morning -->
+                <div>
+                    <h4 class="text-sage-600 font-bold mb-3 flex items-center text-lg"><i class="fa-regular fa-sun mr-2"></i>上午場次</h4>
+                    <ul class="text-sm text-sage-800 space-y-1">
+                        <li class="session-item">
+                            <div class="flex gap-3 mb-1">
+                                <span class="session-time">10:00</span>
+                                <span class="font-bold text-sage-900">Moral, Ethical and Legal Issues of AI in HPE</span>
+                            </div>
+                            <div class="flex justify-between items-center pl-[62px]">
+                                <span class="text-sage-600">奇康診所 張榮哲主任</span>
+                                <span class="font-bold bg-sage-50 px-2 py-0.5 rounded text-sage-700 text-xs">11人</span>
+                            </div>
+                        </li>
+                        <li class="session-item">
+                            <div class="flex gap-3 mb-1">
+                                <span class="session-time">10:30</span>
+                                <span class="font-bold text-sage-900">Profession Identity Formation and AI</span>
+                            </div>
+                            <div class="flex justify-between items-center pl-[62px]">
+                                <span class="text-sage-600">護理部 江惠英副部長</span>
+                                <span class="font-bold bg-sage-50 px-2 py-0.5 rounded text-sage-700 text-xs">19人</span>
+                            </div>
+                        </li>
+                        <li class="session-item">
+                            <div class="flex gap-3 mb-1">
+                                <span class="session-time">11:00</span>
+                                <span class="font-bold text-sage-900">Learning from Errors, Teaching with Empathy</span>
+                            </div>
+                            <div class="flex justify-between items-center pl-[62px]">
+                                <span class="text-sage-600">藥劑部 蘇慧真部長</span>
+                                <span class="font-bold bg-sage-50 px-2 py-0.5 rounded text-sage-700 text-xs">19人</span>
+                            </div>
+                        </li>
+                        <li class="session-item">
+                            <div class="flex gap-3 mb-1">
+                                <span class="session-time">11:30</span>
+                                <span class="font-bold text-sage-900">歡迎來到我的 AMEE 秀</span>
+                            </div>
+                            <div class="flex justify-between items-center pl-[62px]">
+                                <span class="text-sage-600">教學部 林汶秀教學行政管理員</span>
+                                <span class="font-bold bg-sage-50 px-2 py-0.5 rounded text-sage-700 text-xs">13人</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <!-- Afternoon -->
+                <div>
+                    <h4 class="text-sage-600 font-bold mb-3 flex items-center text-lg"><i class="fa-solid fa-mug-hot mr-2"></i>下午場次</h4>
+                    <ul class="text-sm text-sage-800 space-y-1">
+                        <li class="session-item">
+                            <div class="flex gap-3 mb-1">
+                                <span class="session-time">13:30</span>
+                                <span class="font-bold text-sage-900">怡起出發的 AMEE 之旅</span>
+                            </div>
+                            <div class="flex justify-between items-center pl-[62px]">
+                                <span class="text-sage-600">教學部 許淑怡教學行政管理員</span>
+                                <span class="font-bold bg-sage-50 px-2 py-0.5 rounded text-sage-700 text-xs">15人</span>
+                            </div>
+                        </li>
+                        <li class="session-item">
+                            <div class="flex gap-3 mb-1">
+                                <span class="session-time">14:00</span>
+                                <span class="font-bold text-sage-900">A 咪婷、看、聽</span>
+                            </div>
+                            <div class="flex justify-between items-center pl-[62px]">
+                                <span class="text-sage-600">教學部 楊宜婷教學行政管理員</span>
+                                <span class="font-bold bg-sage-50 px-2 py-0.5 rounded text-sage-700 text-xs">18人</span>
+                            </div>
+                        </li>
+                        <li class="session-item">
+                            <div class="flex gap-3 mb-1">
+                                <span class="session-time">14:30</span>
+                                <span class="font-bold text-sage-900">AMEE 氣象台: 下一波教學『云』圖變化</span>
+                            </div>
+                            <div class="flex justify-between items-center pl-[62px]">
+                                <span class="text-sage-600">教學部 盧英云教學行政管理員</span>
+                                <span class="font-bold bg-sage-50 px-2 py-0.5 rounded text-sage-700 text-xs">16人</span>
+                            </div>
+                        </li>
+                        <li class="session-item">
+                            <div class="flex gap-3 mb-1">
+                                <span class="session-time">15:00</span>
+                                <span class="font-bold text-sage-900">詩藝相融，芸思綻放—來自 AMEE 的新啟發</span>
+                            </div>
+                            <div class="flex justify-between items-center pl-[62px]">
+                                <span class="text-sage-600">教學部 陳詩芸教學行政管理員</span>
+                                <span class="font-bold bg-sage-50 px-2 py-0.5 rounded text-sage-700 text-xs">17人</span>
+                            </div>
+                        </li>
+                        <li class="session-item">
+                            <div class="flex gap-3 mb-1">
+                                <span class="session-time">15:30</span>
+                                <span class="font-bold text-sage-900">學習的雅趣: 在 AMEE 找回探索的初心</span>
+                            </div>
+                            <div class="flex justify-between items-center pl-[62px]">
+                                <span class="text-sage-600">教學部 林淑雅教學行政管理員</span>
+                                <span class="font-bold bg-sage-50 px-2 py-0.5 rounded text-sage-700 text-xs">12人</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Demographics -->
+        <div class="col-span-12 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Role -->
+            <div class="card p-6">
+                <h3 class="text-xl font-serif text-sage-800 mb-4 border-b border-sage-100 pb-2">
+                    <i class="fa-solid fa-user-md mr-2 text-sage-500"></i> 學員職位分佈
+                </h3>
+                <div class="h-64 w-full flex justify-center">
+                    <canvas id="roleChart"></canvas>
+                </div>
+            </div>
+            <!-- Years -->
+            <div class="card p-6">
+                <h3 class="text-xl font-serif text-sage-800 mb-4 border-b border-sage-100 pb-2">
+                    <i class="fa-solid fa-clock-rotate-left mr-2 text-sage-500"></i> 學員年資分佈
+                </h3>
+                <div class="h-64 w-full">
+                    <canvas id="yearsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Learning Analysis (Post 1-11) -->
+        <div class="col-span-12 card p-6">
+            <h3 class="text-xl font-serif text-sage-800 mb-6 border-b border-sage-100 pb-2">
+                <i class="fa-brands fa-leanpub mr-2 text-sage-500"></i> 
+                後測學習成果與成效分析 (Post-test)
+            </h3>
+            <div class="h-80 w-full">
+                <canvas id="learningChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Satisfaction Details -->
+        <div class="col-span-12 card p-6">
+            <h3 class="text-xl font-serif text-sage-800 mb-4 border-b border-sage-100 pb-2">
+                <i class="fa-regular fa-face-smile mr-2 text-sage-500"></i>
+                活動滿意度細項 (1-5分)
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6" id="satisfaction-bars">
+                <!-- Bars generated by JS -->
+            </div>
+        </div>
+
+        <!-- Sticky Notes (Qualitative) -->
+        <div class="col-span-12">
+            <h3 class="text-2xl font-serif text-sage-800 mb-6 flex items-center gap-2">
+                <i class="fa-solid fa-quote-left text-sage-500"></i>
+                學員最有感收穫
+            </h3>
+            <div class="flex flex-wrap gap-6 justify-center md:justify-start" id="feedback-grid">
+                <!-- Sticky Notes generated by JS -->
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="w-full text-center py-10 text-sage-400 text-sm">
+        <p>2025 奇美月｜醫學人文沙龍</p>
+    </footer>
+
+    <script>
+        // CONFIG: 您的 Apps Script 網址
+        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwDoTNot1XRvyJLH9jktiKo5KhdR0mLv0oD-vX0JDvdTZXUHZ3u_LnlFL6fB6C-Jd-IIw/exec"; 
+        
+        // Mock Data (Fallback)
+        function generateMockData() {
+            const count = 30;
+            const data = [];
+            const comments = [
+                "講者對於醫學人文的詮釋非常深刻。",
+                "PBL 的帶領技巧示範很實用。",
+                "SDT 理論與實務的結合讓我大開眼界。",
+                "非常有質感的沙龍，環境和內容都很療癒。",
+                "互動環節設計得很棒。",
+                "學到了如何用更有溫度的方式去引導學生。",
+                "對於反思教學有了更具體的架構認識。"
+            ];
+            const roles = ["主治醫師", "住院醫師", "護理師", "醫學生", "其他"];
+            const years = ["1年以下", "1-5年", "6-10年", "10年以上"];
+
+            for (let i = 0; i < count; i++) {
+                data.push({
+                    role: roles[Math.floor(Math.random() * roles.length)],
+                    years: years[Math.floor(Math.random() * years.length)],
+                    post_1: 5, post_2: 4, post_3: 5, post_4: 4, post_5: 5,
+                    post_6: 4, post_7: 4, post_8: 5,
+                    post_9: 4, post_10: 5, post_11: 4,
+                    open_post_1: comments[Math.floor(Math.random() * comments.length)],
+                    sat_1: 5, sat_2: 4, sat_3: 4, sat_4: 5, sat_5: 5, 
+                    sat_6: Math.floor(Math.random() * 3) + 8, // Sat 6 is Rec (1-10)
+                    open_sat_1: "不錯"
+                });
+            }
+            return data;
+        }
+
+        let chartInstances = {};
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggle = document.getElementById('use-real-data');
+            // Auto fetch immediately
+            fetchData();
+        });
+
+        function setMockMode() {
+            console.log("Using mock data");
+            updateDashboard(generateMockData());
+        }
+
+        async function fetchData() {
+            try {
+                const response = await fetch(GAS_API_URL);
+                const json = await response.json();
+                if (json.error) throw new Error(json.error);
+                
+                if (json.length === 0) {
+                    console.log("Connected but no data.");
+                    updateDashboard([]);
+                } else {
+                    updateDashboard(json);
+                }
+            } catch (error) {
+                console.error("Fetch error, falling back to mock:", error);
+                setMockMode();
+            }
+        }
+
+        function parseScore(val) {
+            if (!val) return 0;
+            const p = parseFloat(val);
+            return isNaN(p) ? 0 : p;
+        }
+
+        function calculateAverage(data, key) {
+            if (!data || data.length === 0) return 0;
+            const sum = data.reduce((acc, curr) => acc + parseScore(curr[key]), 0);
+            return (sum / data.length).toFixed(1);
+        }
+
+        function updateDashboard(data) {
+            const count = data.length;
+            document.getElementById('total-responses').innerText = count;
+
+            if (count === 0) {
+                document.getElementById('avg-satisfaction').innerText = "0.0";
+                document.getElementById('avg-recommend').innerText = "0.0";
+                document.getElementById('feedback-grid').innerHTML = '<p class="text-sage-400 w-full text-center">尚無數據</p>';
+                document.getElementById('satisfaction-bars').innerHTML = '';
+                if(chartInstances.learning) chartInstances.learning.destroy();
+                if(chartInstances.role) chartInstances.role.destroy();
+                if(chartInstances.years) chartInstances.years.destroy();
+                return;
+            }
+
+            // KPI Cards
+            document.getElementById('avg-satisfaction').innerText = calculateAverage(data, 'sat_1');
+            // Sat 6 is Recommendation (1-10 scale)
+            document.getElementById('avg-recommend').innerText = calculateAverage(data, 'sat_6'); 
+
+            // Charts
+            updateDemographics(data);
+            updateLearningChart(data);
+            updateSatBars(data);
+            updateStickyNotes(data);
+        }
+
+        function updateDemographics(data) {
+            // Role
+            const roleCounts = {};
+            data.forEach(d => { const r = d.role || "未填寫"; roleCounts[r] = (roleCounts[r] || 0) + 1; });
+            const ctxRole = document.getElementById('roleChart').getContext('2d');
+            if (chartInstances.role) chartInstances.role.destroy();
+            chartInstances.role = new Chart(ctxRole, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(roleCounts),
+                    datasets: [{
+                        data: Object.values(roleCounts),
+                        backgroundColor: ['#749474', '#9bb69b', '#c5d6c5', '#e3ebe3', '#567656'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { position: 'right' } } }
+            });
+
+            // Years
+            const yearCounts = {};
+            data.forEach(d => { const y = d.years || "未填寫"; yearCounts[y] = (yearCounts[y] || 0) + 1; });
+            const ctxYears = document.getElementById('yearsChart').getContext('2d');
+            if (chartInstances.years) chartInstances.years.destroy();
+            chartInstances.years = new Chart(ctxYears, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(yearCounts),
+                    datasets: [{
+                        label: '人數',
+                        data: Object.values(yearCounts),
+                        backgroundColor: '#9bb69b',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function updateLearningChart(data) {
+            const ctx = document.getElementById('learningChart').getContext('2d');
+            // Labels for Post 1-11
+            const labels = [
+                '醫學人文理解', 'PBL技巧', '反思引導', 'Kolb運用', 'SDT理解', 
+                '教學自主性', '勝任感', '關係感', 
+                '獲得具體經驗', '進行反思觀察', '改善教學文化'
+            ];
+            const keys = [
+                'post_1', 'post_2', 'post_3', 'post_4', 'post_5', 
+                'post_6', 'post_7', 'post_8', 
+                'post_9', 'post_10', 'post_11'
+            ];
+            const values = keys.map(k => calculateAverage(data, k));
+
+            if (chartInstances.learning) chartInstances.learning.destroy();
+            chartInstances.learning = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '平均分 (1-5)',
+                        data: values,
+                        backgroundColor: '#9bb69b',
+                        borderRadius: 6,
+                        barThickness: 25
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, max: 5 }, x: { grid: { display: false } } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function updateSatBars(data) {
+            const container = document.getElementById('satisfaction-bars');
+            container.innerHTML = '';
+            // Sat 1 is Overall, Sat 6 is Rec (1-10). 
+            // Showing details 2-5 (1-5 scale)
+            const metrics = [
+                { l: '講者呈現', k: 'sat_2' },
+                { l: '時間安排', k: 'sat_3' },
+                { l: '反思空間', k: 'sat_4' },
+                { l: '符合期待', k: 'sat_5' }
+            ];
+
+            metrics.forEach(m => {
+                const avg = calculateAverage(data, m.k);
+                const pct = (avg / 5) * 100;
+                container.insertAdjacentHTML('beforeend', `
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-sm font-medium text-sage-700">${m.l}</span>
+                            <span class="text-sm font-bold text-sage-600">${avg}</span>
+                        </div>
+                        <div class="w-full bg-sage-100 rounded-full h-2.5">
+                            <div class="bg-sage-500 h-2.5 rounded-full" style="width: ${pct}%"></div>
+                        </div>
+                    </div>
+                `);
+            });
+        }
+
+        function updateStickyNotes(data) {
+            const container = document.getElementById('feedback-grid');
+            container.innerHTML = '';
+            
+            // Use open_post_1
+            const comments = data.map(d => d.open_post_1).filter(c => c && c.toString().trim() !== "").reverse();
+
+            if (comments.length === 0) {
+                container.innerHTML = '<p class="text-sage-400 w-full text-center">尚無文字回饋</p>';
+                return;
+            }
+
+            comments.slice(0, 20).forEach((c, i) => {
+                const colorClass = `note-color-${(i % 4) + 1}`;
+                container.insertAdjacentHTML('beforeend', `
+                    <div class="sticky-note ${colorClass} p-5 rounded-sm w-full md:w-64 min-h-[160px] flex flex-col relative">
+                        <i class="fa-solid fa-thumbtack text-sage-800/20 absolute top-2 left-1/2 -translate-x-1/2"></i>
+                        <div class="mt-4 flex-grow flex items-center justify-center text-center">
+                            <p class="text-sage-900 text-sm font-serif leading-relaxed">"${c}"</p>
+                        </div>
+                    </div>
+                `);
+            });
+        }
+    </script>
+</body>
+</html>
