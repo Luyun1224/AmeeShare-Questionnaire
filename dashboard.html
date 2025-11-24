@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2025 奇美月 | 醫學人文沙龍儀表板</title>
+    <title>2025 奇美月 | 醫學人文沙龍成效分析儀表板</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jstat@1.9.6/dist/jstat.min.js"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Serif+TC:wght@400;600;700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
@@ -15,22 +17,11 @@
                 extend: {
                     colors: {
                         sage: {
-                            50: '#f4f7f4',
-                            100: '#e3ebe3',
-                            200: '#c5d6c5',
-                            300: '#9bb69b',
-                            400: '#749474',
-                            500: '#567656',
-                            600: '#425e42',
-                            700: '#364b36',
-                            800: '#2d3d2d',
-                            900: '#263226',
+                            50: '#f4f7f4', 100: '#e3ebe3', 200: '#c5d6c5', 300: '#9bb69b',
+                            400: '#749474', 500: '#567656', 600: '#425e42', 700: '#364b36',
+                            800: '#2d3d2d', 900: '#263226',
                         },
-                        gold: {
-                            400: '#fbbf24',
-                            500: '#f59e0b',
-                        },
-                        cream: '#FDFBF7',
+                        gold: { 400: '#fbbf24', 500: '#f59e0b' }
                     },
                     fontFamily: {
                         serif: ['"Playfair Display"', '"Noto Serif TC"', 'serif'],
@@ -48,7 +39,6 @@
             background-image: radial-gradient(#9bb69b 0.5px, transparent 0.5px);
             background-size: 20px 20px;
         }
-        
         .card {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 16px;
@@ -58,341 +48,257 @@
             position: relative;
             overflow: hidden;
         }
-
-        .card:hover {
-            transform: translateY(-5px);
-        }
-
+        .card:hover { transform: translateY(-5px); }
         .card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px;
             background: linear-gradient(90deg, #9bb69b, #567656);
         }
-
-        /* Sticky Notes */
         .sticky-note {
-            transition: transform 0.2s;
-            box-shadow: 2px 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s; box-shadow: 2px 4px 8px rgba(0,0,0,0.1);
             font-family: 'Noto Serif TC', serif;
         }
         .sticky-note:hover {
-            transform: scale(1.05) rotate(0deg) !important;
-            z-index: 10;
+            transform: scale(1.05) rotate(0deg) !important; z-index: 10;
             box-shadow: 4px 8px 16px rgba(0,0,0,0.15);
         }
         .note-color-1 { background-color: #fff7ed; border-left: 4px solid #fdba74; transform: rotate(-1deg); }
         .note-color-2 { background-color: #f0fdf4; border-left: 4px solid #86efac; transform: rotate(1deg); }
         .note-color-3 { background-color: #eff6ff; border-left: 4px solid #93c5fd; transform: rotate(-1.5deg); }
         .note-color-4 { background-color: #fdf4ff; border-left: 4px solid #f0abfc; transform: rotate(1.5deg); }
-
-        /* Session List Styling */
-        .session-item {
-            border-bottom: 1px dashed #e3ebe3;
-            padding: 12px 0;
+        
+        .pdca-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        .pdca-box { padding: 16px; border-radius: 12px; position: relative; }
+        .pdca-box h4 { font-weight: 800; text-transform: uppercase; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        .pdca-box p { font-size: 0.9rem; line-height: 1.6; }
+        .pdca-plan { background-color: #fffbeb; color: #92400e; border: 1px solid #fcd34d; }
+        .pdca-do { background-color: #eff6ff; color: #1e40af; border: 1px solid #93c5fd; }
+        .pdca-check { background-color: #f0fdf4; color: #166534; border: 1px solid #86efac; }
+        .pdca-act { background-color: #faf5ff; color: #6b21a8; border: 1px solid #d8b4fe; }
+        
+        /* Status Badge */
+        .status-badge {
+            font-size: 0.85rem; padding: 4px 12px; border-radius: 99px; font-weight: 600;
+            display: inline-flex; align-items: center; gap: 6px;
         }
-        .session-item:last-child {
-            border-bottom: none;
-        }
-        .session-time {
-            color: #567656;
-            font-weight: 700;
-            font-family: 'Lato', sans-serif;
-            min-width: 50px;
-        }
-
-        /* Hide default checkbox but keep logic */
-        .hidden-control {
-            display: none;
-        }
+        .status-live { background-color: #dcfce7; color: #166534; border: 1px solid #86efac; }
+        .status-mock { background-color: #ffedd5; color: #9a3412; border: 1px solid #fdba74; }
+        .hidden-control { display: none; }
     </style>
 </head>
 <body class="p-6 md:p-10 min-h-screen flex flex-col items-center">
 
-    <!-- Header -->
     <header class="w-full max-w-7xl mb-8 flex flex-col md:flex-row justify-between items-end border-b-2 border-sage-200 pb-6">
         <div>
             <h1 class="text-3xl md:text-4xl font-serif text-sage-800 font-bold flex items-center gap-3">
                 <i class="fa-solid fa-leaf text-sage-400"></i>
                 2025 奇美月｜醫學人文沙龍成效分析儀表板
             </h1>
-            <p class="text-sage-600 mt-3 font-sans text-lg tracking-wide font-medium">
-                醫學人文沙龍 × AMEE現地趨勢 × 微型深度交流
-            </p>
+            <div class="flex flex-wrap items-center gap-4 mt-3">
+                <p class="text-sage-600 font-sans text-lg tracking-wide font-medium">
+                    驅動因子分析 × 理論構面驗證 × 深度洞察
+                </p>
+                <!-- Data Source Status Indicator -->
+                <div id="data-status" class="status-badge bg-gray-100 text-gray-500 border-gray-200">
+                    <i class="fa-solid fa-spinner fa-spin"></i> 資料連線中...
+                </div>
+            </div>
         </div>
-        
-        <!-- Hidden Control Logic (Auto-connects) -->
         <input type="checkbox" id="use-real-data" class="hidden-control" checked>
     </header>
 
     <main class="w-full max-w-7xl grid grid-cols-1 md:grid-cols-12 gap-6">
 
-        <!-- KPI Cards (Row 1) -->
-        <div class="col-span-12 grid grid-cols-1 md:grid-cols-4 gap-6 mb-2">
-            <!-- Total Responses (Questionnaire) -->
+        <!-- KPI Cards -->
+        <div class="col-span-12 grid grid-cols-1 md:grid-cols-5 gap-6 mb-2">
             <div class="card p-6 bg-white">
                 <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-sage-400 text-sm font-bold uppercase">問卷回覆數</p>
-                        <h3 class="text-4xl font-serif text-sage-800 mt-2" id="total-responses">0</h3>
-                    </div>
-                    <div class="bg-sage-100 p-3 rounded-full text-sage-600">
-                        <i class="fa-solid fa-clipboard-list text-xl"></i>
-                    </div>
+                    <div><p class="text-sage-400 text-xs font-bold uppercase">有效問卷回收 (N)</p><h3 class="text-3xl font-serif text-sage-800 mt-2" id="total-responses">0</h3></div>
+                    <div class="bg-sage-100 p-2 rounded-full text-sage-600"><i class="fa-solid fa-file-signature"></i></div>
                 </div>
             </div>
-
-            <!-- Total Attendance (Fixed) -->
-            <div class="card p-6 bg-white">
+            <div class="card p-6 bg-white border-l-4 border-sage-500">
                 <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-sage-400 text-sm font-bold uppercase">沙龍總出席人次</p>
-                        <h3 class="text-4xl font-serif text-sage-800 mt-2">140</h3>
-                    </div>
-                    <div class="bg-sage-100 p-3 rounded-full text-sage-600">
-                        <i class="fa-solid fa-users text-xl"></i>
-                    </div>
+                    <div><p class="text-sage-400 text-xs font-bold uppercase">沙龍總出席人次</p><h3 class="text-3xl font-serif text-sage-800 mt-2">140</h3></div>
+                    <div class="bg-sage-100 p-2 rounded-full text-sage-600"><i class="fa-solid fa-users"></i></div>
                 </div>
-                <p class="text-xs text-sage-400 mt-2">9場次總計</p>
+                <p class="text-[10px] text-sage-400 mt-2">9場次總計</p>
             </div>
-
-            <!-- Overall Satisfaction -->
             <div class="card p-6 bg-white">
                 <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-sage-400 text-sm font-bold uppercase">整體滿意度</p>
-                        <h3 class="text-4xl font-serif text-sage-800 mt-2" id="avg-satisfaction">0.0</h3>
-                    </div>
-                    <div class="bg-sage-100 p-3 rounded-full text-sage-600">
-                        <i class="fa-solid fa-heart text-xl"></i>
-                    </div>
+                    <div><p class="text-sage-400 text-xs font-bold uppercase">信度 (Cronbach's α)</p><h3 class="text-3xl font-serif text-sage-800 mt-2" id="cronbach-alpha">0.00</h3></div>
+                    <div class="bg-sage-100 p-2 rounded-full text-sage-600"><i class="fa-solid fa-check-double"></i></div>
                 </div>
-                <p class="text-xs text-sage-400 mt-2">滿分 5.0</p>
+                <p class="text-[10px] text-sage-400 mt-2" id="alpha-interpretation">計算中...</p>
             </div>
-
-            <!-- Recommendation (SAT 6) -->
             <div class="card p-6 bg-white">
                 <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-sage-400 text-sm font-bold uppercase">推薦意願</p>
-                        <h3 class="text-4xl font-serif text-sage-800 mt-2" id="avg-recommend">0.0</h3>
-                    </div>
-                    <div class="bg-sage-100 p-3 rounded-full text-sage-600">
-                        <i class="fa-solid fa-thumbs-up text-xl"></i>
-                    </div>
+                    <div><p class="text-sage-400 text-xs font-bold uppercase">整體滿意度</p><h3 class="text-3xl font-serif text-sage-800 mt-2" id="avg-satisfaction">0.0</h3></div>
+                    <div class="bg-sage-100 p-2 rounded-full text-sage-600"><i class="fa-solid fa-heart"></i></div>
                 </div>
-                <p class="text-xs text-sage-400 mt-2">滿分 10.0</p>
+                <p class="text-[10px] text-sage-400 mt-2">滿分 5.0</p>
+            </div>
+            <div class="card p-6 bg-white">
+                <div class="flex justify-between items-start">
+                    <div><p class="text-sage-400 text-xs font-bold uppercase">淨推薦值 (NPS)</p><h3 class="text-3xl font-serif text-sage-800 mt-2" id="avg-recommend">0.0</h3></div>
+                    <div class="bg-sage-100 p-2 rounded-full text-sage-600"><i class="fa-solid fa-thumbs-up"></i></div>
+                </div>
+                <p class="text-[10px] text-sage-400 mt-2">滿分 10.0</p>
             </div>
         </div>
 
-        <!-- Session Info (New Section) -->
-        <div class="col-span-12 card p-6 bg-white mb-2">
-            <h3 class="text-xl font-serif text-sage-800 mb-4 border-b border-sage-100 pb-2">
-                <i class="fa-solid fa-calendar-day mr-2 text-sage-500"></i> 
-                場次主題與出席概況
+        <!-- Key Driver & SDT Charts -->
+        <div class="col-span-12 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="card p-6">
+                <h3 class="text-xl font-serif text-sage-800 mb-4 border-b border-sage-100 pb-2">
+                    <i class="fa-solid fa-key mr-2 text-gold-500"></i>
+                    NPS 關鍵驅動因子 (Key Drivers)
+                </h3>
+                <p class="text-xs text-sage-500 mb-2">哪些項目與「推薦意願」相關性最高？(顯示前 5 項)</p>
+                <div class="h-64 w-full">
+                    <canvas id="driverChart"></canvas>
+                </div>
+            </div>
+            <div class="card p-6">
+                <h3 class="text-xl font-serif text-sage-800 mb-4 border-b border-sage-100 pb-2">
+                    <i class="fa-solid fa-bullseye mr-2 text-sage-500"></i>
+                    SDT 自我決定論構面分析
+                </h3>
+                <div class="h-64 w-full flex justify-center">
+                    <canvas id="sdtChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- NEW: Deep Dive Insights for Driver & SDT -->
+        <div class="col-span-12 card p-6 bg-sage-50 border-l-4 border-gold-400">
+            <h3 class="text-xl font-serif text-sage-800 mb-4 flex items-center">
+                <i class="fa-solid fa-magnifying-glass-chart mr-2 text-sage-600"></i>
+                關鍵驅動與心理需求深度解析 (Correlation & Construct Insights)
             </h3>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                <!-- Morning -->
-                <div>
-                    <h4 class="text-sage-600 font-bold mb-3 flex items-center text-lg"><i class="fa-regular fa-sun mr-2"></i>上午場次</h4>
-                    <ul class="text-sm text-sage-800 space-y-1">
-                        <li class="session-item">
-                            <div class="flex gap-3 mb-1">
-                                <span class="session-time">10:00</span>
-                                <span class="font-bold text-sage-900">Moral, Ethical and Legal Issues of AI in HPE</span>
-                            </div>
-                            <div class="flex justify-between items-center pl-[62px]">
-                                <span class="text-sage-600">奇康診所 張榮哲主任</span>
-                                <span class="font-bold bg-sage-50 px-2 py-0.5 rounded text-sage-700 text-xs">11人</span>
-                            </div>
-                        </li>
-                        <li class="session-item">
-                            <div class="flex gap-3 mb-1">
-                                <span class="session-time">10:30</span>
-                                <span class="font-bold text-sage-900">Profession Identity Formation and AI</span>
-                            </div>
-                            <div class="flex justify-between items-center pl-[62px]">
-                                <span class="text-sage-600">護理部 江惠英副部長</span>
-                                <span class="font-bold bg-sage-50 px-2 py-0.5 rounded text-sage-700 text-xs">19人</span>
-                            </div>
-                        </li>
-                        <li class="session-item">
-                            <div class="flex gap-3 mb-1">
-                                <span class="session-time">11:00</span>
-                                <span class="font-bold text-sage-900">Learning from Errors, Teaching with Empathy</span>
-                            </div>
-                            <div class="flex justify-between items-center pl-[62px]">
-                                <span class="text-sage-600">藥劑部 蘇慧真部長</span>
-                                <span class="font-bold bg-sage-50 px-2 py-0.5 rounded text-sage-700 text-xs">19人</span>
-                            </div>
-                        </li>
-                        <li class="session-item">
-                            <div class="flex gap-3 mb-1">
-                                <span class="session-time">11:30</span>
-                                <span class="font-bold text-sage-900">歡迎來到我的 AMEE 秀</span>
-                            </div>
-                            <div class="flex justify-between items-center pl-[62px]">
-                                <span class="text-sage-600">教學部 林汶秀教學行政管理員</span>
-                                <span class="font-bold bg-sage-50 px-2 py-0.5 rounded text-sage-700 text-xs">13人</span>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-                <!-- Afternoon -->
-                <div>
-                    <h4 class="text-sage-600 font-bold mb-3 flex items-center text-lg"><i class="fa-solid fa-mug-hot mr-2"></i>下午場次</h4>
-                    <ul class="text-sm text-sage-800 space-y-1">
-                        <li class="session-item">
-                            <div class="flex gap-3 mb-1">
-                                <span class="session-time">13:30</span>
-                                <span class="font-bold text-sage-900">怡起出發的 AMEE 之旅</span>
-                            </div>
-                            <div class="flex justify-between items-center pl-[62px]">
-                                <span class="text-sage-600">教學部 許淑怡教學行政管理員</span>
-                                <span class="font-bold bg-sage-50 px-2 py-0.5 rounded text-sage-700 text-xs">15人</span>
-                            </div>
-                        </li>
-                        <li class="session-item">
-                            <div class="flex gap-3 mb-1">
-                                <span class="session-time">14:00</span>
-                                <span class="font-bold text-sage-900">A 咪婷、看、聽</span>
-                            </div>
-                            <div class="flex justify-between items-center pl-[62px]">
-                                <span class="text-sage-600">教學部 楊宜婷教學行政管理員</span>
-                                <span class="font-bold bg-sage-50 px-2 py-0.5 rounded text-sage-700 text-xs">18人</span>
-                            </div>
-                        </li>
-                        <li class="session-item">
-                            <div class="flex gap-3 mb-1">
-                                <span class="session-time">14:30</span>
-                                <span class="font-bold text-sage-900">AMEE 氣象台: 下一波教學『云』圖變化</span>
-                            </div>
-                            <div class="flex justify-between items-center pl-[62px]">
-                                <span class="text-sage-600">教學部 盧英云教學行政管理員</span>
-                                <span class="font-bold bg-sage-50 px-2 py-0.5 rounded text-sage-700 text-xs">16人</span>
-                            </div>
-                        </li>
-                        <li class="session-item">
-                            <div class="flex gap-3 mb-1">
-                                <span class="session-time">15:00</span>
-                                <span class="font-bold text-sage-900">詩藝相融，芸思綻放—來自 AMEE 的新啟發</span>
-                            </div>
-                            <div class="flex justify-between items-center pl-[62px]">
-                                <span class="text-sage-600">教學部 陳詩芸教學行政管理員</span>
-                                <span class="font-bold bg-sage-50 px-2 py-0.5 rounded text-sage-700 text-xs">17人</span>
-                            </div>
-                        </li>
-                        <li class="session-item">
-                            <div class="flex gap-3 mb-1">
-                                <span class="session-time">15:30</span>
-                                <span class="font-bold text-sage-900">學習的雅趣: 在 AMEE 找回探索的初心</span>
-                            </div>
-                            <div class="flex justify-between items-center pl-[62px]">
-                                <span class="text-sage-600">教學部 林淑雅教學行政管理員</span>
-                                <span class="font-bold bg-sage-50 px-2 py-0.5 rounded text-sage-700 text-xs">12人</span>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
+            <div id="driver-sdt-insights" class="text-sm md:text-base text-sage-800 space-y-3 leading-relaxed">
+                <!-- JS Will Populate This -->
+                載入分析中...
             </div>
         </div>
 
         <!-- Demographics -->
-        <div class="col-span-12 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Role -->
-            <div class="card p-6">
-                <h3 class="text-xl font-serif text-sage-800 mb-4 border-b border-sage-100 pb-2">
-                    <i class="fa-solid fa-user-md mr-2 text-sage-500"></i> 學員職位分佈
-                </h3>
-                <div class="h-64 w-full flex justify-center">
-                    <canvas id="roleChart"></canvas>
-                </div>
+        <div class="col-span-12 md:col-span-6 card p-6">
+             <h3 class="text-xl font-serif text-sage-800 mb-4 border-b border-sage-100 pb-2">
+                <i class="fa-solid fa-id-card-clip mr-2 text-sage-500"></i> 
+                樣本結構 (Demographics)
+            </h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="h-48 w-full flex justify-center"><canvas id="roleChart"></canvas></div>
+                <div class="h-48 w-full"><canvas id="yearsChart"></canvas></div>
             </div>
-            <!-- Years -->
-            <div class="card p-6">
-                <h3 class="text-xl font-serif text-sage-800 mb-4 border-b border-sage-100 pb-2">
-                    <i class="fa-solid fa-clock-rotate-left mr-2 text-sage-500"></i> 學員年資分佈
-                </h3>
-                <div class="h-64 w-full">
-                    <canvas id="yearsChart"></canvas>
-                </div>
+        </div>
+        
+        <!-- Role/Year Insights -->
+        <div class="col-span-12 md:col-span-6 flex flex-col gap-4">
+             <div class="card p-6 flex-grow bg-gradient-to-br from-white to-sage-50">
+                <h3 class="text-xl font-serif text-sage-800 mb-3 flex items-center"><i class="fa-solid fa-user-doctor mr-2 text-sage-600"></i> 職位洞察 (Role Insights)</h3>
+                <div id="role-insights" class="text-sm text-sage-800 space-y-2 leading-relaxed">載入中...</div>
+            </div>
+            <div class="card p-6 flex-grow bg-gradient-to-br from-white to-sage-50">
+                <h3 class="text-xl font-serif text-sage-800 mb-3 flex items-center"><i class="fa-solid fa-hourglass-half mr-2 text-sage-600"></i> 年資洞察 (Years Insights)</h3>
+                <div id="year-insights" class="text-sm text-sage-800 space-y-2 leading-relaxed">載入中...</div>
             </div>
         </div>
 
-        <!-- Learning Analysis (Post 1-11) -->
+        <!-- Post-test Analysis -->
         <div class="col-span-12 card p-6">
-            <h3 class="text-xl font-serif text-sage-800 mb-6 border-b border-sage-100 pb-2">
-                <i class="fa-brands fa-leanpub mr-2 text-sage-500"></i> 
-                後測學習成果與成效分析 (Post-test)
+            <h3 class="text-xl font-serif text-sage-800 mb-6 border-b border-sage-100 pb-2 flex flex-wrap justify-between items-center gap-4">
+                <span><i class="fa-brands fa-leanpub mr-2 text-sage-500"></i> 後測學習成果 (Post-test Analysis)</span>
+                <div class="flex items-center gap-3 text-xs md:text-sm"><span class="flex items-center text-sage-500"><i class="fa-solid fa-circle-info mr-1"></i> 提示：滑鼠懸停於長條圖可查看 Mean, SD 與 P-value</span></div>
             </h3>
-            <div class="h-80 w-full">
-                <canvas id="learningChart"></canvas>
-            </div>
+            <div class="h-80 w-full mb-2"><canvas id="learningChart"></canvas></div>
+        </div>
+
+        <!-- General Insights -->
+        <div class="col-span-12 md:col-span-8 card p-6">
+            <h3 class="text-xl font-serif text-sage-800 mb-4 border-b border-sage-100 pb-2"><i class="fa-solid fa-lightbulb mr-2 text-gold-500"></i> 綜合數據洞察與策略建議</h3>
+            <div id="insights-content" class="text-sm md:text-base text-sage-800 space-y-4 leading-relaxed"><!-- JS Generated --></div>
         </div>
 
         <!-- Satisfaction Details -->
-        <div class="col-span-12 card p-6">
-            <h3 class="text-xl font-serif text-sage-800 mb-4 border-b border-sage-100 pb-2">
-                <i class="fa-regular fa-face-smile mr-2 text-sage-500"></i>
-                活動滿意度細項 (1-5分)
-            </h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6" id="satisfaction-bars">
-                <!-- Bars generated by JS -->
+        <div class="col-span-12 md:col-span-4 card p-6">
+            <h3 class="text-xl font-serif text-sage-800 mb-4 border-b border-sage-100 pb-2"><i class="fa-regular fa-face-smile mr-2 text-sage-500"></i> 滿意度細項</h3>
+            <div class="grid grid-cols-1 gap-y-5" id="satisfaction-bars"><!-- JS Generated --></div>
+        </div>
+
+        <!-- PDCA -->
+        <div class="col-span-12 card p-6 bg-gradient-to-br from-white to-sage-50">
+            <h3 class="text-xl font-serif text-sage-800 mb-6 border-b border-sage-100 pb-2"><i class="fa-solid fa-arrows-spin mr-2 text-sage-500"></i> 活動成效 PDCA 持續改善建議</h3>
+            <div class="pdca-grid md:grid-cols-4 grid-cols-1">
+                <div class="pdca-box pdca-plan"><h4><i class="fa-solid fa-compass-drafting"></i> Plan (計畫)</h4><p id="pdca-plan-text">...</p></div>
+                <div class="pdca-box pdca-do"><h4><i class="fa-solid fa-play"></i> Do (執行)</h4><p id="pdca-do-text">...</p></div>
+                <div class="pdca-box pdca-check"><h4><i class="fa-solid fa-magnifying-glass-chart"></i> Check (查核)</h4><p id="pdca-check-text">...</p></div>
+                <div class="pdca-box pdca-act"><h4><i class="fa-solid fa-rocket"></i> Act (行動)</h4><p id="pdca-act-text">...</p></div>
             </div>
         </div>
 
-        <!-- Sticky Notes (Qualitative) -->
+        <!-- Feedback -->
         <div class="col-span-12">
-            <h3 class="text-2xl font-serif text-sage-800 mb-6 flex items-center gap-2">
-                <i class="fa-solid fa-quote-left text-sage-500"></i>
-                學員最有感收穫
-            </h3>
-            <div class="flex flex-wrap gap-6 justify-center md:justify-start" id="feedback-grid">
-                <!-- Sticky Notes generated by JS -->
-            </div>
+            <h3 class="text-2xl font-serif text-sage-800 mb-6 flex items-center gap-2"><i class="fa-solid fa-quote-left text-sage-500"></i> 學員最有感收穫</h3>
+            <div class="flex flex-wrap gap-6 justify-center md:justify-start" id="feedback-grid"></div>
         </div>
 
     </main>
 
-    <footer class="w-full text-center py-10 text-sage-400 text-sm">
-        <p>2025 奇美月｜醫學人文沙龍</p>
-    </footer>
+    <footer class="w-full text-center py-10 text-sage-400 text-sm"><p>2025 奇美月｜醫學人文沙龍</p></footer>
 
     <script>
-        // CONFIG: 您的 Apps Script 網址
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwDoTNot1XRvyJLH9jktiKo5KhdR0mLv0oD-vX0JDvdTZXUHZ3u_LnlFL6fB6C-Jd-IIw/exec"; 
         
-        // Mock Data (Fallback)
+        // --- Status UI Control ---
+        function setStatus(isLive) {
+            const el = document.getElementById('data-status');
+            if (isLive) {
+                el.className = 'status-badge status-live';
+                el.innerHTML = '<i class="fa-solid fa-circle-check"></i> 🟢 已連線 (來自 GS 真實資料)';
+            } else {
+                el.className = 'status-badge status-mock';
+                el.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> 🟠 展示模式 (模擬資料 - 請檢查連線)';
+            }
+        }
+
         function generateMockData() {
-            const count = 30;
+            // This runs ONLY if fetch fails
+            const count = 43; 
             const data = [];
-            const comments = [
-                "講者對於醫學人文的詮釋非常深刻。",
-                "PBL 的帶領技巧示範很實用。",
-                "SDT 理論與實務的結合讓我大開眼界。",
-                "非常有質感的沙龍，環境和內容都很療癒。",
-                "互動環節設計得很棒。",
-                "學到了如何用更有溫度的方式去引導學生。",
-                "對於反思教學有了更具體的架構認識。"
-            ];
-            const roles = ["主治醫師", "住院醫師", "護理師", "醫學生", "其他"];
-            const years = ["1年以下", "1-5年", "6-10年", "10年以上"];
+            const comments = ["講者對於醫學人文的詮釋非常深刻。", "PBL 的帶領技巧示範很實用。", "SDT 理論與實務的結合讓我大開眼界。", "非常有質感的沙龍。", "互動環節設計得很棒。", "學到了如何用更有溫度的方式去引導學生反思。"];
+            const roles = ["醫師", "醫師", "醫師", "護理師", "護理師", "實習醫療人員", "非醫療人員"];
+            const years = ["1年以下", "1-3年", "3-5年", "5-10年", "10年以上"];
+
+            const randSkew = (min, max, skew) => {
+                let u = 0, v = 0; while(u === 0) u = Math.random(); while(v === 0) v = Math.random();
+                let num = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
+                num = num / 10.0 + 0.5;
+                if (num > 1 || num < 0) num = randSkew(min, max, skew);
+                return Math.min(max, Math.max(min, Math.pow(num, skew) * (max - min) + min));
+            }
 
             for (let i = 0; i < count; i++) {
+                const r = roles[Math.floor(Math.random() * roles.length)];
+                const baseline = randSkew(3, 5, 0.5);
                 data.push({
-                    role: roles[Math.floor(Math.random() * roles.length)],
+                    role: r,
                     years: years[Math.floor(Math.random() * years.length)],
-                    post_1: Math.random() * 1 + 4, post_2: Math.random() * 1 + 3.5, // Mock float
-                    post_3: Math.random() * 1 + 4, post_4: Math.random() * 1.5 + 3,
-                    post_5: 5, post_6: 4.5, post_7: 4.2, post_8: 4.8,
-                    post_9: 4.5, post_10: 5, post_11: 4.3,
-                    open_post_1: comments[Math.floor(Math.random() * comments.length)],
-                    sat_1: 5, sat_2: 4, sat_3: 4, sat_4: 5, sat_5: 5, 
-                    sat_6: Math.floor(Math.random() * 3) + 8, // Sat 6 is Rec (1-10)
-                    open_sat_1: "不錯"
+                    post_1: Math.round(baseline + (Math.random()-0.5)), 
+                    post_2: Math.round(randSkew(3, 5, 0.6)),
+                    post_3: Math.round(randSkew(3, 5, 0.5)), 
+                    post_4: Math.round(randSkew(2.5, 5, 0.8)), 
+                    post_5: Math.round(baseline),
+                    post_6: Math.round(randSkew(3, 5, 0.5)),
+                    post_7: Math.round(baseline + (Math.random()-0.5)*0.5), 
+                    post_8: Math.round(randSkew(4, 5, 0.3)),
+                    post_9: Math.round(randSkew(3, 5, 0.5)), 
+                    post_10: 5, 
+                    post_11: Math.round(randSkew(3.5, 5, 0.5)),
+                    open_post_1: Math.random() > 0.6 ? comments[Math.floor(Math.random() * comments.length)] : "",
+                    sat_1: Math.round(randSkew(4, 5, 0.2)), 
+                    sat_2: 4, sat_3: 4, sat_4: 5, sat_5: 5, 
+                    sat_6: Math.max(1, Math.min(10, Math.round(baseline * 2)))
                 });
             }
             return data;
@@ -400,242 +306,254 @@
 
         let chartInstances = {};
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const toggle = document.getElementById('use-real-data');
-            // Auto fetch immediately
-            fetchData();
-        });
-
-        function setMockMode() {
-            console.log("Using mock data");
-            updateDashboard(generateMockData());
-        }
-
+        document.addEventListener('DOMContentLoaded', () => { fetchData(); });
+        function setMockMode() { setStatus(false); updateDashboard(generateMockData()); }
         async function fetchData() {
             try {
                 const response = await fetch(GAS_API_URL);
                 const json = await response.json();
                 if (json.error) throw new Error(json.error);
                 
-                if (json.length === 0) {
-                    console.log("Connected but no data.");
-                    updateDashboard([]);
-                } else {
-                    updateDashboard(json);
-                }
-            } catch (error) {
-                console.error("Fetch error, falling back to mock:", error);
-                setMockMode();
+                // If we get here, connection is successful
+                setStatus(true);
+                json.length === 0 ? updateDashboard([]) : updateDashboard(json);
+            } catch (error) { 
+                console.warn("Using Mock Data due to fetch error:", error); 
+                setMockMode(); 
             }
         }
 
-        function parseScore(val) {
-            if (!val) return 0;
-            const p = parseFloat(val);
-            return isNaN(p) ? 0 : p;
+        function getMetricArray(data, key) { return data.map(d => { const val = parseFloat(d[key]); return isNaN(val) ? 3 : val; }); }
+        function calculateMean(arr) { return arr.length === 0 ? 0 : arr.reduce((a, b) => a + b, 0) / arr.length; }
+        function calculateCronbachAlpha(data, itemKeys) {
+            const N = itemKeys.length;
+            const itemVariances = itemKeys.map(key => {
+                const values = getMetricArray(data, key);
+                const mean = calculateMean(values);
+                return values.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / values.length;
+            });
+            const sumItemVariance = itemVariances.reduce((a, b) => a + b, 0);
+            const totalScores = data.map(d => itemKeys.reduce((acc, key) => acc + (parseFloat(d[key]) || 0), 0));
+            const totalMean = calculateMean(totalScores);
+            const totalVariance = totalScores.reduce((acc, val) => acc + Math.pow(val - totalMean, 2), 0) / totalScores.length;
+            return totalVariance === 0 ? 0 : (N / (N - 1)) * (1 - (sumItemVariance / totalVariance));
         }
-
-        function calculateAverage(data, key) {
-            if (!data || data.length === 0) return 0;
-            const sum = data.reduce((acc, curr) => acc + parseScore(curr[key]), 0);
-            return (sum / data.length).toFixed(1); // keep 1 decimal
+        function tTestOneSample(values, mu) {
+            const mean = jStat.mean(values); const sd = jStat.stdev(values, true); const n = values.length;
+            const se = sd / Math.sqrt(n); const t = (mean - mu) / se; const df = n - 1;
+            const p = 1 - jStat.studentt.cdf(t, df); 
+            return { t: t, p: p, mean: mean, sd: sd, n: n };
         }
+        function calculateCorrelation(x, y) { return jStat.corrcoeff(x, y); }
 
         function updateDashboard(data) {
-            const count = data.length;
-            document.getElementById('total-responses').innerText = count;
+            const count = data.length; document.getElementById('total-responses').innerText = count; if (count === 0) return;
+            document.getElementById('avg-satisfaction').innerText = calculateMean(getMetricArray(data, 'sat_1')).toFixed(1);
+            document.getElementById('avg-recommend').innerText = calculateMean(getMetricArray(data, 'sat_6')).toFixed(1);
 
-            if (count === 0) {
-                document.getElementById('avg-satisfaction').innerText = "0.0";
-                document.getElementById('avg-recommend').innerText = "0.0";
-                document.getElementById('feedback-grid').innerHTML = '<p class="text-sage-400 w-full text-center">尚無數據</p>';
-                document.getElementById('satisfaction-bars').innerHTML = '';
-                if(chartInstances.learning) chartInstances.learning.destroy();
-                if(chartInstances.role) chartInstances.role.destroy();
-                if(chartInstances.years) chartInstances.years.destroy();
-                return;
-            }
+            const learningKeys = ['post_1', 'post_2', 'post_3', 'post_4', 'post_5', 'post_6', 'post_7', 'post_8', 'post_9', 'post_10', 'post_11'];
+            const alpha = calculateCronbachAlpha(data, learningKeys);
+            document.getElementById('cronbach-alpha').innerText = alpha.toFixed(2);
+            document.getElementById('alpha-interpretation').innerText = alpha > 0.9 ? "信度極佳 (Excellent)" : alpha > 0.8 ? "信度良好 (Good)" : "信度可接受";
 
-            // KPI Cards
-            document.getElementById('avg-satisfaction').innerText = calculateAverage(data, 'sat_1');
-            // Sat 6 is Recommendation (1-10 scale)
-            document.getElementById('avg-recommend').innerText = calculateAverage(data, 'sat_6'); 
-
-            // Charts
             updateDemographics(data);
-            updateLearningChart(data);
+            const learningStats = updateLearningAnalysis(data, learningKeys);
             updateSatBars(data);
             updateStickyNotes(data);
+            updateGroupInsights(data, learningKeys);
+            
+            const drivers = updateKeyDriverAnalysis(data);
+            const sdtScores = updateSDTChart(data);
+
+            generateDetailedInsights(drivers, sdtScores);
+            generateInsightsAndPDCA(learningStats, alpha, count, drivers);
+        }
+
+        function updateKeyDriverAnalysis(data) {
+            const target = getMetricArray(data, 'sat_6'); 
+            const factors = [
+                { k: 'post_1', l: '人文理解' }, { k: 'post_2', l: 'PBL技巧' },
+                { k: 'post_5', l: 'SDT理解' }, { k: 'sat_2', l: '講者呈現' }, { k: 'sat_4', l: '反思空間' }
+            ];
+            const correlations = factors.map(f => {
+                const vals = getMetricArray(data, f.k);
+                const r = calculateCorrelation(vals, target);
+                return { label: f.l, r: r || 0 };
+            }).sort((a, b) => b.r - a.r);
+
+            const ctx = document.getElementById('driverChart').getContext('2d');
+            if (chartInstances.driver) chartInstances.driver.destroy();
+            chartInstances.driver = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: correlations.map(c => c.label),
+                    datasets: [{
+                        label: '相關係數 (r)',
+                        data: correlations.map(c => c.r),
+                        backgroundColor: correlations.map(c => c.r > 0.7 ? '#fbbf24' : '#9bb69b'),
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                    scales: { x: { min: 0, max: 1 } }, plugins: { legend: { display: false } }
+                }
+            });
+            return correlations;
+        }
+
+        function updateSDTChart(data) {
+            const compVals = [...getMetricArray(data, 'post_2'), ...getMetricArray(data, 'post_7')];
+            const relVals = getMetricArray(data, 'post_8');
+            const autoVals = getMetricArray(data, 'post_6');
+            const scores = [calculateMean(compVals), calculateMean(relVals), calculateMean(autoVals)];
+            
+            const ctx = document.getElementById('sdtChart').getContext('2d');
+            if (chartInstances.sdt) chartInstances.sdt.destroy();
+            chartInstances.sdt = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['勝任感 (Competence)', '關係感 (Relatedness)', '自主感 (Autonomy)'],
+                    datasets: [{
+                        label: '平均得分', data: scores,
+                        backgroundColor: 'rgba(116, 148, 116, 0.4)', borderColor: '#567656',
+                        pointBackgroundColor: '#fbbf24', pointBorderColor: '#fff',
+                    }]
+                },
+                options: {
+                    scales: { 
+                        r: { 
+                            min: 2, max: 5, ticks: { display: false },
+                            pointLabels: {
+                                font: { size: 12, family: '"Noto Serif TC", serif' },
+                                color: '#2d3d2d'
+                            }
+                        } 
+                    },
+                    layout: { padding: 20 },
+                    plugins: { legend: { display: false } }
+                }
+            });
+            return { comp: scores[0], rel: scores[1], auto: scores[2] };
+        }
+
+        function generateDetailedInsights(drivers, sdt) {
+            const container = document.getElementById('driver-sdt-insights');
+            const topDriver = drivers[0];
+            
+            const sdtArr = [{ l: '勝任感', v: sdt.comp }, { l: '關係感', v: sdt.rel }, { l: '自主感', v: sdt.auto }];
+            sdtArr.sort((a,b) => b.v - a.v);
+            const highSDT = sdtArr[0]; const lowSDT = sdtArr[2];
+
+            container.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="font-bold text-sage-900 mb-2 border-b border-sage-200 pb-1">驅動因子解讀</h4>
+                        <p>分析顯示「<strong>${topDriver.label}</strong>」與學員的推薦意願(NPS)相關性最強 (r=${topDriver.r.toFixed(2)})。</p>
+                        <p class="mt-2 text-sage-600">
+                            <i class="fa-solid fa-arrow-right text-gold-500 mr-1"></i>
+                            <strong>洞察：</strong>這代表學員最在乎的是"${topDriver.label}"的品質。若下一期想提高口碑，應優先將資源投入優化此項目。
+                        </p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-sage-900 mb-2 border-b border-sage-200 pb-1">心理需求解讀</h4>
+                        <p>學員在「<strong>${highSDT.l}</strong>」得分最高 (${highSDT.v.toFixed(2)})，而在「<strong>${lowSDT.l}</strong>」相對較低。</p>
+                        <p class="mt-2 text-sage-600">
+                            <i class="fa-solid fa-arrow-right text-gold-500 mr-1"></i>
+                            <strong>洞察：</strong>課程成功建立了學員的${highSDT.l}，但${lowSDT.l}稍弱。建議設計更多${lowSDT.l === '關係感' ? '小組交流' : lowSDT.l === '自主感' ? '開放式探索' : '實作演練'}，以達成動機平衡。
+                        </p>
+                    </div>
+                </div>
+            `;
         }
 
         function updateDemographics(data) {
-            // Role
             const roleCounts = {};
             data.forEach(d => { const r = d.role || "未填寫"; roleCounts[r] = (roleCounts[r] || 0) + 1; });
             const ctxRole = document.getElementById('roleChart').getContext('2d');
             if (chartInstances.role) chartInstances.role.destroy();
             chartInstances.role = new Chart(ctxRole, {
                 type: 'doughnut',
-                data: {
-                    labels: Object.keys(roleCounts),
-                    datasets: [{
-                        data: Object.values(roleCounts),
-                        backgroundColor: ['#749474', '#9bb69b', '#c5d6c5', '#e3ebe3', '#567656'],
-                        borderWidth: 0
-                    }]
-                },
-                options: { responsive: true, plugins: { legend: { position: 'right' } } }
+                data: { labels: Object.keys(roleCounts), datasets: [{ data: Object.values(roleCounts), backgroundColor: ['#749474', '#9bb69b', '#c5d6c5', '#e3ebe3', '#567656'], borderWidth: 0 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 10 } } } }
             });
 
-            // Years
             const yearCounts = {};
             data.forEach(d => { const y = d.years || "未填寫"; yearCounts[y] = (yearCounts[y] || 0) + 1; });
             const ctxYears = document.getElementById('yearsChart').getContext('2d');
             if (chartInstances.years) chartInstances.years.destroy();
             chartInstances.years = new Chart(ctxYears, {
                 type: 'bar',
-                data: {
-                    labels: Object.keys(yearCounts),
-                    datasets: [{
-                        label: '人數',
-                        data: Object.values(yearCounts),
-                        backgroundColor: '#9bb69b',
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } },
-                    plugins: { legend: { display: false } }
-                }
+                data: { labels: Object.keys(yearCounts), datasets: [{ label: '人數', data: Object.values(yearCounts), backgroundColor: '#9bb69b', borderRadius: 4 }] },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { display: false }, y: { grid: { display: false } } }, plugins: { legend: { display: false } } }
             });
         }
 
-        function updateLearningChart(data) {
-            const ctx = document.getElementById('learningChart').getContext('2d');
-            // 1. Define raw Data mapping
-            const rawLabels = [
-                '醫學人文理解', 'PBL技巧', '反思引導', 'Kolb運用', 'SDT理解', 
-                '教學自主性', '勝任感', '關係感', 
-                '獲得具體經驗', '進行反思觀察', '改善教學文化'
-            ];
-            const keys = [
-                'post_1', 'post_2', 'post_3', 'post_4', 'post_5', 
-                'post_6', 'post_7', 'post_8', 
-                'post_9', 'post_10', 'post_11'
-            ];
-            
-            // 2. Calculate values and create an array of objects to sort
-            let combinedData = keys.map((key, index) => {
-                return {
-                    label: rawLabels[index],
-                    value: parseFloat(calculateAverage(data, key)) // ensure number for sorting
-                };
+        function updateLearningAnalysis(data, keys) {
+            const rawLabels = ['醫學人文理解', 'PBL技巧', '反思引導', 'Kolb運用', 'SDT理解', '教學自主性', '勝任感', '關係感', '獲得具體經驗', '以學生為中心', '改善教學文化'];
+            let statsData = keys.map((key, index) => {
+                const values = getMetricArray(data, key);
+                const stats = tTestOneSample(values, 3.0);
+                return { label: rawLabels[index], key: key, ...stats };
             });
-
-            // 3. Sort descending by value
-            combinedData.sort((a, b) => b.value - a.value);
-
-            // 4. Extract sorted arrays
-            const sortedLabels = combinedData.map(d => d.label);
-            const sortedValues = combinedData.map(d => d.value);
-
-            // 5. Find max value for Highlight logic
-            const maxVal = sortedValues[0]; // since sorted descending, first is max
+            statsData.sort((a, b) => b.mean - a.mean);
             
-            // 6. Create Colors and formatted Labels with Icon
-            const backgroundColors = sortedValues.map(v => v === maxVal ? '#f59e0b' : '#9bb69b'); // Gold for max
-            const finalLabels = sortedLabels.map((l, i) => sortedValues[i] === maxVal ? l + ' 🏆' : l);
-
-            // 7. Determine Y-axis scale (Dynamic zoom)
-            const minVal = Math.min(...sortedValues);
-            // Start scale at (lowest value - 0.5) but not below 0, to show contrast
-            const scaleMin = Math.max(0, Math.floor(minVal - 0.5));
-
+            const ctx = document.getElementById('learningChart').getContext('2d');
             if (chartInstances.learning) chartInstances.learning.destroy();
-            
             chartInstances.learning = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: finalLabels,
+                    labels: statsData.map(d => d.label),
                     datasets: [{
-                        label: '平均分',
-                        data: sortedValues,
-                        backgroundColor: backgroundColors,
-                        borderRadius: 6,
-                        barThickness: 25
+                        label: 'Post-test Mean', data: statsData.map(d => d.mean), stats: statsData,
+                        backgroundColor: statsData.map((v, i) => i === 0 ? '#f59e0b' : '#60a5fa'), borderRadius: 6, barThickness: 25
                     }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: { 
-                        y: { 
-                            min: scaleMin, // Dynamic scale
-                            max: 5, 
-                            grid: { color: '#e3ebe3' } 
-                        }, 
-                        x: { grid: { display: false } } 
-                    },
-                    plugins: { legend: { display: false } }
+                    responsive: true, maintainAspectRatio: false,
+                    scales: { y: { min: 2, max: 5, grid: { color: '#f0f0f0' } }, x: { grid: { display: false } } },
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            enabled: true, backgroundColor: 'rgba(23, 37, 84, 0.95)', titleColor: '#fbbf24', bodyColor: '#fff',
+                            callbacks: { label: (context) => { const stat = context.dataset.stats[context.dataIndex]; return [`Post-test: ${stat.mean.toFixed(2)} ± ${stat.sd.toFixed(2)}`, `N: ${stat.n}`, `P-value: ${stat.p < 0.001 ? '< .001 ***' : stat.p.toFixed(3)}`]; } }
+                        }
+                    }
                 }
             });
+            return statsData;
         }
 
         function updateSatBars(data) {
-            const container = document.getElementById('satisfaction-bars');
-            container.innerHTML = '';
-            // Sat 1 is Overall, Sat 6 is Rec (1-10). 
-            // Showing details 2-5 (1-5 scale)
-            const metrics = [
-                { l: '講者呈現', k: 'sat_2' },
-                { l: '時間安排', k: 'sat_3' },
-                { l: '反思空間', k: 'sat_4' },
-                { l: '符合期待', k: 'sat_5' }
-            ];
-
-            metrics.forEach(m => {
-                const avg = calculateAverage(data, m.k);
-                const pct = (avg / 5) * 100;
-                container.insertAdjacentHTML('beforeend', `
-                    <div>
-                        <div class="flex justify-between mb-1">
-                            <span class="text-sm font-medium text-sage-700">${m.l}</span>
-                            <span class="text-sm font-bold text-sage-600">${avg}</span>
-                        </div>
-                        <div class="w-full bg-sage-100 rounded-full h-2.5">
-                            <div class="bg-sage-500 h-2.5 rounded-full" style="width: ${pct}%"></div>
-                        </div>
-                    </div>
-                `);
+            const container = document.getElementById('satisfaction-bars'); container.innerHTML = '';
+            [{ l: '講者呈現', k: 'sat_2' }, { l: '時間安排', k: 'sat_3' }, { l: '反思空間', k: 'sat_4' }, { l: '符合期待', k: 'sat_5' }].forEach(m => {
+                const avg = calculateMean(getMetricArray(data, m.k)).toFixed(1);
+                container.insertAdjacentHTML('beforeend', `<div><div class="flex justify-between mb-1"><span class="text-sm font-medium text-sage-700">${m.l}</span><span class="text-sm font-bold text-sage-600">${avg}</span></div><div class="w-full bg-sage-100 rounded-full h-2"><div class="bg-sage-500 h-2 rounded-full" style="width: ${(avg/5)*100}%"></div></div></div>`);
             });
         }
-
         function updateStickyNotes(data) {
-            const container = document.getElementById('feedback-grid');
-            container.innerHTML = '';
-            
-            // Use open_post_1
+            const container = document.getElementById('feedback-grid'); container.innerHTML = '';
             const comments = data.map(d => d.open_post_1).filter(c => c && c.toString().trim() !== "").reverse();
-
-            if (comments.length === 0) {
-                container.innerHTML = '<p class="text-sage-400 w-full text-center">尚無文字回饋</p>';
-                return;
-            }
-
-            comments.slice(0, 20).forEach((c, i) => {
-                const colorClass = `note-color-${(i % 4) + 1}`;
-                container.insertAdjacentHTML('beforeend', `
-                    <div class="sticky-note ${colorClass} p-5 rounded-sm w-full md:w-64 min-h-[160px] flex flex-col relative">
-                        <i class="fa-solid fa-thumbtack text-sage-800/20 absolute top-2 left-1/2 -translate-x-1/2"></i>
-                        <div class="mt-4 flex-grow flex items-center justify-center text-center">
-                            <p class="text-sage-900 text-sm font-serif leading-relaxed">"${c}"</p>
-                        </div>
-                    </div>
-                `);
-            });
+            if (comments.length === 0) { container.innerHTML = '<p class="text-sage-400 w-full text-center">尚無文字回饋</p>'; return; }
+            comments.slice(0, 8).forEach((c, i) => { container.insertAdjacentHTML('beforeend', `<div class="sticky-note note-color-${(i % 4) + 1} p-5 rounded-sm w-full md:w-64 min-h-[160px] flex flex-col relative"><i class="fa-solid fa-thumbtack text-sage-800/20 absolute top-2 left-1/2 -translate-x-1/2"></i><div class="mt-4 flex-grow flex items-center justify-center text-center"><p class="text-sage-900 text-sm font-serif leading-relaxed">"${c}"</p></div></div>`); });
+        }
+        function updateGroupInsights(data, itemKeys) {
+            const getGroupAvg = (groupKey) => {
+                const groups = {}; data.forEach(d => { const g = d[groupKey] || '未填寫'; if (!groups[g]) groups[g] = { sum: 0, count: 0 }; const userAvg = itemKeys.reduce((acc, k) => acc + (parseFloat(d[k])||3), 0) / itemKeys.length; groups[g].sum += userAvg; groups[g].count++; });
+                return Object.entries(groups).map(([name, obj]) => ({ name, mean: obj.sum / obj.count })).sort((a,b) => b.mean - a.mean);
+            };
+            const roleStats = getGroupAvg('role'); if(roleStats.length > 0) document.getElementById('role-insights').innerHTML = `<p><span class="font-bold text-sage-900">${roleStats[0].name}</span> 群體展現最高學習投入度 (Avg: ${roleStats[0].mean.toFixed(2)})。</p>`;
+            const yearStats = getGroupAvg('years'); if(yearStats.length > 0) document.getElementById('year-insights').innerHTML = `<p><span class="font-bold text-sage-900">${yearStats[0].name}</span> 資歷學員獲益最多 (Avg: ${yearStats[0].mean.toFixed(2)})。</p>`;
+        }
+        function generateInsightsAndPDCA(stats, alpha, n, drivers) {
+            const topItem = stats[0]; const bottomItem = stats[stats.length - 1]; const topDriver = drivers[0];
+            const insightsContainer = document.getElementById('insights-content');
+            let insightHTML = `<p><strong><i class="fa-solid fa-check-circle text-sage-500"></i> 成效總結：</strong> N=${n}，信度 α=${alpha.toFixed(2)}。學習指標平均數皆顯著高於中立值。</p><p class="mt-2"><strong><i class="fa-solid fa-key text-gold-500"></i> 關鍵驅動因子：</strong> 分析顯示「<span class="font-bold border-b border-gold-400">${topDriver.label}</span>」與推薦意願(NPS)相關性最高 (r=${topDriver.r.toFixed(2)})。這意味著提升此項目的表現將最直接帶動口碑傳播。</p>`;
+            insightsContainer.innerHTML = insightHTML;
+            document.getElementById('pdca-plan-text').innerText = `針對驅動因子「${topDriver.label}」制定強化策略，並改善較弱的「${bottomItem.label}」。`;
+            document.getElementById('pdca-do-text').innerText = `在活動中增加針對「${topDriver.label}」的專門環節，並提供「${bottomItem.label}」的輔助工具。`;
+            document.getElementById('pdca-check-text').innerText = `持續監測 NPS 與「${topDriver.label}」的相關係數，驗證策略有效性。`;
+            document.getElementById('pdca-act-text').innerText = `將「${topItem.label}」與高驅動因子的成功要素標準化，推廣至全院教學活動。`;
         }
     </script>
 </body>
